@@ -11,8 +11,8 @@ namespace ParseSard
     class Program
     {
         private static List<Dataset> datasets = new List<Dataset>();
-        private static readonly string sardRoot = @"..\..\..\..\sard_archive\";
-        private static readonly string outputDirectory = @"..\..\..\Output";
+        private static readonly string sardRoot = @"..\..\..\sard_archive\";
+        private static readonly string outputDirectory = @"..\..\Output";
         private static readonly string cwePattern = @"cwe-*_*\d+";
 
         static void Main(string[] args)
@@ -23,6 +23,7 @@ namespace ParseSard
             var testCases = document.Descendants("testcase");
             int totalCount = 0;
             int cSharpCount = 0;
+            //int lastCollectedCSharpCount = 0;
             int flawedCount = 0;
             int fixedCount = 0;
             int mixedCount = 0;
@@ -32,14 +33,18 @@ namespace ParseSard
             int deprecatedCount = 0;
             Dictionary<string, int> cweCounts = new Dictionary<string, int>();
             Dictionary<string, int> flawlessCweCounts = new Dictionary<string, int>();
-            //datasets.Add(new RemoveCommentsDataset());
+            datasets.Add(new RemoveCommentsDataset());
             //datasets.Add(new MethodCallsDataset(true));
             //datasets.Add(new MethodCallsDataset(false));
 
             foreach (var testCase in testCases)
             {
                 totalCount++;
-                if (testCase.Attribute("language").Value == "C#")
+                if
+                (
+                    testCase.Attribute("language").Value == "C#"
+                    && testCase.Elements("file").Count(f => f.Attribute("path").Value.EndsWith(".cs", StringComparison.InvariantCultureIgnoreCase)) == 1
+                )
                 {
                     cSharpCount++;
                     switch (testCase.Attribute("status").Value)
@@ -58,7 +63,7 @@ namespace ParseSard
                     string className = null;
                     bool? isFlawed = null;
 
-                    var files = testCase.Elements("file");
+                    var files = testCase.Elements("file").Where(f => f.Attribute("path").Value.EndsWith(".cs", StringComparison.InvariantCultureIgnoreCase));
                     if (files.Any(file => file.Elements("flaw").Any()))
                     {
                         isFlawed = true;
@@ -127,9 +132,9 @@ namespace ParseSard
                         {
                             flawlessCweCounts.Add(className, 1);
                         }
-                        //Console.WriteLine("Test case with no flaw: ");
-                        //Console.WriteLine(testCase);
-                        //Console.Read();
+                        Console.WriteLine("Test case with no flaw: ");
+                        Console.WriteLine(testCase);
+                        Console.Read();
                     }
 
                     if (isFlawed == null)
@@ -138,6 +143,16 @@ namespace ParseSard
                     }
 
                     AddExample(className, isFlawed.Value, files);
+                }
+                //if (cSharpCount != lastCollectedCSharpCount && cSharpCount % 50 == 0)
+                //{
+                //    GC.Collect();
+                //    lastCollectedCSharpCount = cSharpCount;
+                //}
+                if (totalCount % 1000 == 0)
+                {
+                    Console.WriteLine($"Test cases processed: {totalCount}");
+                    Console.WriteLine($"C# Test cases processed: {cSharpCount}");
                 }
             }
             Console.WriteLine("Number of test cases in manifest: " + totalCount);
