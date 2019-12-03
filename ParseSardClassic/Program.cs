@@ -1,4 +1,4 @@
-﻿using ParseSard.Datasets;
+﻿using ParseSardClassic.Datasets;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace ParseSard
+namespace ParseSardClassic
 {
     class Program
     {
@@ -33,9 +33,11 @@ namespace ParseSard
             int deprecatedCount = 0;
             Dictionary<string, int> cweCounts = new Dictionary<string, int>();
             Dictionary<string, int> flawlessCweCounts = new Dictionary<string, int>();
-            datasets.Add(new RemoveCommentsDataset());
+            //datasets.Add(new RemoveCommentsDataset());
             //datasets.Add(new MethodCallsDataset(true));
             //datasets.Add(new MethodCallsDataset(false));
+            datasets.Add(new ExternalArgumentsDataset(true));
+            //datasets.Add(new ExternalArgumentsDataset(false));
 
             foreach (var testCase in testCases)
             {

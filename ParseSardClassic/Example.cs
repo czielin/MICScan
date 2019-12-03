@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ParseSard
+namespace ParseSardClassic
 {
     public class Example
     {

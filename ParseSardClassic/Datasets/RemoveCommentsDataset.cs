@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ParseSard.Datasets
+namespace ParseSardClassic.Datasets
 {
     public class RemoveCommentsDataset : Dataset
     {

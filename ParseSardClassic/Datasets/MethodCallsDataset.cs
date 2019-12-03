@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ParseSard.Datasets
+namespace ParseSardClassic.Datasets
 {
     public class MethodCallsDataset : Dataset
     {
-        private bool includeSource;
+        protected bool includeSource;
 
         public MethodCallsDataset(bool includeSource)
         {
@@ -69,6 +69,10 @@ namespace ParseSard.Datasets
                 features.AppendLine(signature);
             }
 
+            PrintDescendentNodes(root, semanticModel);
+            Console.WriteLine(features.ToString());
+            Console.ReadLine();
+
             dataset.Add(new Example { ClassName = className, IsFlawed = isFlawed, Features = features.ToString() });
         }
 
@@ -91,9 +95,9 @@ namespace ParseSard.Datasets
             return type;
         }
 
-        private string BuildMethodName(SyntaxNode syntaxNode, SemanticModel semanticModel)
+        protected virtual string BuildMethodName(InvocationExpressionSyntax invocationExpressionSyntax, SemanticModel semanticModel)
         {
-            IMethodSymbol methodSymbol = semanticModel.GetSymbolInfo(syntaxNode).Symbol as IMethodSymbol;
+            IMethodSymbol methodSymbol = semanticModel.GetSymbolInfo(invocationExpressionSyntax).Symbol as IMethodSymbol;
             return methodSymbol.ToDisplayString().Replace(" ", "");
         }
 

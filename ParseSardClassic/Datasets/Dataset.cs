@@ -8,7 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-namespace ParseSard.Datasets
+namespace ParseSardClassic.Datasets
 {
     public abstract class Dataset
     {
