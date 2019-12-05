@@ -1,52 +1,46 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Scripting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ParseSardClassic.Datasets
 {
     public class MethodCallsDataset : Dataset
     {
-        protected bool includeSource;
-
-        public MethodCallsDataset(bool includeSource)
-        {
-            this.includeSource = includeSource;
-        }
+        ScriptOptions scriptOptions = ScriptOptions.Default.WithImports("System", "System.Math");
+        HashSet<string> unevaluatedIfs = new HashSet<string>();
 
         protected override string FileName
         {
             get
             {
-                return includeSource ? "MethodCallsWithSource" : "MethodCallsWithoutSource";
+                return nameof(MethodCallsDataset);
             }
         }
 
-        public override void AddExample(string className, bool isFlawed, List<string> fileContents)
+        public override async Task<(Example withSource, Example withoutSource)> AddExample(string className, bool isFlawed, List<string> fileContents)
         {
             StringBuilder features;
             SyntaxTree syntaxTree;
-            if (includeSource)
-            {
-                string withoutComments = RemoveComments(fileContents);
-                features = new StringBuilder(withoutComments);
-                features.AppendLine();
-                syntaxTree = CSharpSyntaxTree.ParseText(withoutComments);
-            }
-            else
-            {
-                string combinedContents = CombineContents(fileContents);
-                features = new StringBuilder();
-                syntaxTree = CSharpSyntaxTree.ParseText(combinedContents);
-            }
+            string withoutComments = null;
+
+            withoutComments = RemoveComments(fileContents);
+            features = new StringBuilder();
+            features.AppendLine();
+            syntaxTree = CSharpSyntaxTree.ParseText(withoutComments);
 
             SyntaxNode root = syntaxTree.GetRoot();
 
             CSharpCompilation compilation = CreateCompilation(syntaxTree);
             SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
+
+#if DEBUG
             if (semanticModel.GetDiagnostics().Any(d => d.Severity == DiagnosticSeverity.Error))
             {
                 foreach (Diagnostic diagnostic in semanticModel.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error))
@@ -62,52 +56,110 @@ namespace ParseSardClassic.Datasets
                 }
                 Console.ReadLine();
             }
+#endif
 
-            foreach (InvocationExpressionSyntax expression in root.DescendantNodes().Where(n => n.IsKind(SyntaxKind.InvocationExpression)))
+            foreach (SyntaxNode syntaxNode in root.DescendantNodes())
             {
-                string signature = BuildMethodSignature(expression, semanticModel);
-                features.AppendLine(signature);
+                if
+                (
+                    syntaxNode is ExpressionSyntax expressionSyntax
+                    &&
+                    (
+                        syntaxNode.IsKind(SyntaxKind.InvocationExpression)
+                        || syntaxNode.IsKind(SyntaxKind.ObjectCreationExpression)
+                    )
+                    && await IsReachable(syntaxNode)
+                )
+                {
+                    string signature = await BuildMethodSignature(expressionSyntax, semanticModel);
+                    features.AppendLine(signature);
+                }
+
+                if (syntaxNode is AssignmentExpressionSyntax assignmentExpressionSyntax && await IsReachable(assignmentExpressionSyntax))
+                {
+                    ISymbol leftSymbol = semanticModel.GetSymbolInfo(assignmentExpressionSyntax.Left).Symbol;
+                    if (leftSymbol is IPropertySymbol)
+                    {
+                        string signature = await BuildMethodSignature(assignmentExpressionSyntax.Left, semanticModel);
+                        features.AppendLine(signature);
+                    }
+                }
+
+                if (syntaxNode.IsKind(SyntaxKind.StringLiteralExpression) && syntaxNode.ToString().Contains("^[0-9]*") && await IsReachable(syntaxNode))
+                {
+                    features.AppendLine("HasNumbersOnlyRegex");
+                    break;
+                }
             }
 
-            PrintDescendentNodes(root, semanticModel);
-            Console.WriteLine(features.ToString());
-            Console.ReadLine();
-
-            dataset.Add(new Example { ClassName = className, IsFlawed = isFlawed, Features = features.ToString() });
+            return AddExamples(className, isFlawed, features, withoutComments);
         }
 
-        private string BuildMethodSignature(InvocationExpressionSyntax invocationExpressionSyntax, SemanticModel semanticModel)
+        protected (Example withSource, Example withoutSource) AddExamples(string className, bool isFlawed, StringBuilder features, string source)
         {
-            string signature = BuildMethodName(invocationExpressionSyntax, semanticModel);
+            Example withoutSource = new Example { ClassName = className, IsFlawed = isFlawed, Features = features.ToString() };
+            datasetWithoutSource.Add(withoutSource);
+            features.Insert(0, source);
+            Example withSource = new Example { ClassName = className, IsFlawed = isFlawed, Features = features.ToString() };
+            datasetWithSource.Add(withSource);
+            return (withSource, withoutSource);
+        }
+
+        private async Task<string> BuildMethodSignature(ExpressionSyntax invocationExpressionSyntax, SemanticModel semanticModel)
+        {
+            string signature = await BuildMethodName(invocationExpressionSyntax, semanticModel);
             return signature;
         }
 
-        private ITypeSymbol GetArgumentType(CSharpSyntaxNode argument, SemanticModel semanticModel)
+        protected virtual async Task<string> BuildMethodName(ExpressionSyntax invocationExpressionSyntax, SemanticModel semanticModel)
         {
-            ITypeSymbol type;
-
-            IMethodSymbol methodSymbol = semanticModel.GetSymbolInfo(argument).Symbol as IMethodSymbol;
-            type = methodSymbol?.ReturnType;
-            if (type == null)
-            {
-                type = semanticModel.GetTypeInfo(argument).Type;
-            }
-            return type;
-        }
-
-        protected virtual string BuildMethodName(InvocationExpressionSyntax invocationExpressionSyntax, SemanticModel semanticModel)
-        {
-            IMethodSymbol methodSymbol = semanticModel.GetSymbolInfo(invocationExpressionSyntax).Symbol as IMethodSymbol;
+            ISymbol methodSymbol = semanticModel.GetSymbolInfo(invocationExpressionSyntax).Symbol;
             return methodSymbol.ToDisplayString().Replace(" ", "");
         }
 
-        private string BuildExpressionName(SyntaxNode syntaxNode, SemanticModel semanticModel)
+        protected async Task<bool> IsReachable(SyntaxNode syntaxNode)
         {
-            foreach (IdentifierNameSyntax identifierNameSyntax in syntaxNode.ChildNodes().OfType<IdentifierNameSyntax>())
+            bool isReachable = true;
+
+            foreach (var ifNode in syntaxNode.Ancestors().OfType<IfStatementSyntax>())
             {
-                Console.WriteLine($"Identifier type: {identifierNameSyntax} {semanticModel.GetSymbolInfo(identifierNameSyntax).CandidateSymbols.FirstOrDefault()}");
+                string ifCondition = ifNode.Condition.ToString();
+
+                try
+                {
+                    if (!unevaluatedIfs.Contains(ifCondition))
+                    {
+                        object result = await CSharpScript.EvaluateAsync(ifCondition, scriptOptions);
+                        if (result is bool booleanResult)
+                        {
+                            if (!booleanResult)
+                            {
+                                isReachable = false;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Unexpected return type: {result.GetType()}");
+                            Console.ReadLine();
+                        }
+                    }
+                }
+                catch (CompilationErrorException ex)
+                {
+                    if (!unevaluatedIfs.Contains(ifCondition))
+                    {
+                        unevaluatedIfs.Add(ifCondition);
+                    }
+                }
             }
-            return string.Join(".", syntaxNode.ChildNodes().OfType<IdentifierNameSyntax>());
+
+            return isReachable;
+        }
+
+        public override string GetPostExecutionOutput()
+        {
+            return string.Join(Environment.NewLine, unevaluatedIfs);
         }
     }
 }

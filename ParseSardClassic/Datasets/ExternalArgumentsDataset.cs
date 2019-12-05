@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Shared.Extensions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using System;
@@ -7,58 +8,116 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
 
 namespace ParseSardClassic.Datasets
 {
     public class ExternalArgumentsDataset : MethodCallsDataset
     {
-        public ExternalArgumentsDataset(bool includeSource) : base(includeSource)
+        private readonly List<string> potentialVulnerableMethods = new List<string>
         {
-        }
+            "System.Console.ReadLine",
+            "System.Console.Read",
+            "System.Console.ReadKey",
+            "System.IO.StreamReader.Peek",
+            "System.IO.StreamReader.Read",
+            "System.IO.StreamReader.ReadAsync",
+            "System.IO.StreamReader.ReadBlock",
+            "System.IO.StreamReader.ReadBlockAsync",
+            "System.IO.StreamReader.ReadLine",
+            "System.IO.StreamReader.ReadToEnd",
+            "System.IO.StreamReader.ReadToEndAsync",
+        };
 
         protected override string FileName
         {
             get
             {
-                return includeSource ? "MethodCallsWithSource" : "MethodCallsWithoutSource";
+                return nameof(ExternalArgumentsDataset);
             }
         }
 
-        protected override string BuildMethodName(InvocationExpressionSyntax invocationExpressionSyntax, SemanticModel semanticModel)
+        protected override async Task<string> BuildMethodName(ExpressionSyntax expressionSyntax, SemanticModel semanticModel)
         {
-            string methodName = base.BuildMethodName(invocationExpressionSyntax, semanticModel);
-            methodName += BuildArgumentsExternal(invocationExpressionSyntax, semanticModel);
-            //PrintDescendentNodes(syntaxNode, semanticModel);
-            IMethodSymbol methodSymbol = semanticModel.GetSymbolInfo(invocationExpressionSyntax).Symbol as IMethodSymbol;
-            return methodSymbol.ToDisplayString().Replace(" ", "");
+            string methodName = await base.BuildMethodName(expressionSyntax, semanticModel);
+            methodName += await BuildArgumentsExternal(expressionSyntax, semanticModel);
+            return methodName;
         }
 
-        private string BuildArgumentsExternal(InvocationExpressionSyntax invocationExpressionSyntax, SemanticModel semanticModel)
+        private async Task<string> BuildArgumentsExternal(ExpressionSyntax expressionSyntax, SemanticModel semanticModel)
         {
             List<bool?> externals = new List<bool?>();
-            foreach (ArgumentSyntax argument in invocationExpressionSyntax.ArgumentList.Arguments)
+            IEnumerable<SyntaxNode> arguments;
+            if (expressionSyntax is InvocationExpressionSyntax invocationExpressionSyntax)
+            {
+                arguments = invocationExpressionSyntax.ArgumentList.Arguments.Select(a => a.ChildNodes().Single());
+            }
+            else if (expressionSyntax is ObjectCreationExpressionSyntax objectCreationExpressionSyntax)
+            {
+                arguments = objectCreationExpressionSyntax.ArgumentList.Arguments.Select(a => a.ChildNodes().Single());
+            }
+            else if (expressionSyntax is MemberAccessExpressionSyntax && expressionSyntax.Parent is AssignmentExpressionSyntax assignmentExpressionSyntax)
+            {
+                arguments = new List<SyntaxNode>
+                {
+                    assignmentExpressionSyntax.Right
+                };
+            }
+            else
+            {
+                arguments = new SeparatedSyntaxList<ArgumentSyntax>();
+                Console.WriteLine($"Unhandled ExpressionSyntax type: {expressionSyntax.GetType()}");
+                Console.ReadLine();
+            }
+
+            foreach (SyntaxNode argument in arguments)
             {
                 bool? hasExternalInput = null;
-                var argumentChild = argument.ChildNodes().Single();
-                ISymbol argumentSymbol = semanticModel.GetSymbolInfo(argumentChild).Symbol;
-                if (argumentChild.IsKind(SyntaxKind.StringLiteralExpression))
+                ISymbol argumentSymbol = semanticModel.GetSymbolInfo(argument).Symbol;
+                if (IsLiteralExpression(argument))
                 {
                     hasExternalInput = false;
                 }
-                else if (argumentChild.IsKind(SyntaxKind.IdentifierName))
+                else if (argument.IsKind(SyntaxKind.IdentifierName) && argumentSymbol?.Kind == SymbolKind.Local)
                 {
-
+                    hasExternalInput = await IsAssignedFromUserInput((ILocalSymbol)argumentSymbol, semanticModel);
                 }
-                //switch (argumentSymbol)
-                //{
-                //    case ILocalSymbol localSymbol:
-                //        //hasExternalInput = await IsAssignedFromUserInputMethod(localSymbol);
-                //        break;
-                //}
+                else if (argument.IsKind(SyntaxKind.IdentifierName) && argumentSymbol?.Kind == SymbolKind.Parameter)
+                {
+                    // TODO: If nested methods then track if parameter value comes from untrusted input.
+                    hasExternalInput = true;
+                }
+                else if (argument.IsKind(SyntaxKind.InvocationExpression) && argumentSymbol?.Kind == SymbolKind.Method)
+                {
+                    hasExternalInput = MethodContainsUserInputMethod(expressionSyntax, semanticModel);
+                }
+                else if (argument.IsKind(SyntaxKind.AddExpression) && argumentSymbol?.Kind == SymbolKind.Method)
+                {
+                    hasExternalInput = await ExpressionContainsUserInput((BinaryExpressionSyntax)argument, semanticModel);
+                }
+                else if (argument is ElementAccessExpressionSyntax elementAccessExpressionSyntax)
+                {
+                    hasExternalInput = semanticModel.GetSymbolInfo(elementAccessExpressionSyntax.Expression).Symbol?.Kind == SymbolKind.Parameter;
+                }
+                else if (argument is MemberAccessExpressionSyntax memberAccessExpressionSyntax)
+                {
+                    hasExternalInput = MethodContainsUserInputMethod(memberAccessExpressionSyntax.Expression, semanticModel);
+                }
+                else if (argument is SimpleLambdaExpressionSyntax)
+                {
+                    // TODO: Handle lambda expression behavior if code samples make it necessary.
+                    hasExternalInput = false;
+                }
+
                 if (hasExternalInput == null)
                 {
                     Console.WriteLine($"Don't yet know how to parse arguments of this form: {argument}");
-                    PrintDescendentNodes(invocationExpressionSyntax, semanticModel);
+                    PrintDescendentNodes(expressionSyntax, semanticModel);
+                    Console.WriteLine();
+                    Console.WriteLine(expressionSyntax.SyntaxTree.GetRoot());
+                    PrintDescendentNodes(expressionSyntax.SyntaxTree.GetRoot(), semanticModel);
                     Console.ReadLine();
                 }
                 externals.Add(hasExternalInput);
@@ -66,16 +125,141 @@ namespace ParseSardClassic.Datasets
             return $"IsExternal({string.Join(",", externals.Select(e => e == null ? "?" : e.ToString()))})";
         }
 
-        private async Task<bool> IsAssignedFromUserInputMethod(ILocalSymbol localSymbol, SemanticModel semanticModel)
+        private async Task<bool> ExpressionContainsUserInput(BinaryExpressionSyntax binaryExpressionSyntax, SemanticModel semanticModel)
         {
-            //var argumentReferences = await SymbolFinder.FindReferencesAsync(localSymbol, semanticModel.doc);
-            //SymbolFinder.FindReferencesAsync()
-            //semanticModel.
-            //foreach (var reference in argumentReferences)
-            //{
-            //    Console.WriteLine(reference);
-            //}
-            throw new NotImplementedException();
+            bool expressionContainsUserInput = false;
+            ILocalSymbol localSymbol = semanticModel.GetSymbolInfo(binaryExpressionSyntax.Left).Symbol as ILocalSymbol;
+            expressionContainsUserInput = localSymbol != null && await IsAssignedFromUserInput(localSymbol, semanticModel);
+            if (!expressionContainsUserInput)
+            {
+                localSymbol = semanticModel.GetSymbolInfo(binaryExpressionSyntax.Right).Symbol as ILocalSymbol;
+                expressionContainsUserInput = localSymbol != null && await IsAssignedFromUserInput(localSymbol, semanticModel);
+            }
+            return expressionContainsUserInput;
         }
+
+        private bool MethodContainsUserInputMethod(ExpressionSyntax invocationExpressionSyntax, SemanticModel semanticModel)
+        {
+            bool methodContainsUserInputMethod = false;
+            foreach (InvocationExpressionSyntax childInvocation in invocationExpressionSyntax.DescendantNodes().OfType<InvocationExpressionSyntax>())
+            {
+                IMethodSymbol methodSymbol = semanticModel.GetSymbolInfo(childInvocation).Symbol as IMethodSymbol;
+                if (IsPotentialUserInputMethod(methodSymbol))
+                {
+                    methodContainsUserInputMethod = true;
+                }
+            }
+            return methodContainsUserInputMethod;
+        }
+
+        private bool IsLiteralExpression(SyntaxNode syntaxNode)
+        {
+            return syntaxNode.IsKind(SyntaxKind.StringLiteralExpression)
+                || syntaxNode.IsKind(SyntaxKind.NumericLiteralExpression)
+                || syntaxNode.IsKind(SyntaxKind.NullLiteralExpression)
+                || syntaxNode.IsKind(SyntaxKind.CharacterLiteralExpression)
+                || syntaxNode.IsKind(SyntaxKind.TrueLiteralExpression)
+                || syntaxNode.IsKind(SyntaxKind.FalseLiteralExpression);
+        }
+
+        private async Task<bool> RightHandSideContainsUserInput(ExpressionSyntax rightSideExpression, SemanticModel semanticModel, List<string> ignoreSymbols)
+        {
+            bool rightHandSideContainsUserInput = false;
+            ISymbol symbol = semanticModel.GetSymbolInfo(rightSideExpression).Symbol;
+
+            if (!IsLiteralExpression(rightSideExpression) && !ignoreSymbols.Contains(symbol?.ToDisplayString()))
+            {
+                if
+                (
+                    rightSideExpression is ElementAccessExpressionSyntax elementAccessExpressionSyntax
+                )
+                {
+                    ISymbol elementAccessSymbol = semanticModel.GetSymbolInfo(elementAccessExpressionSyntax.Expression).Symbol;
+                    if (elementAccessSymbol.Kind == SymbolKind.Parameter)
+                    {
+                        rightHandSideContainsUserInput = true;
+                    }
+                    else if (elementAccessSymbol is ILocalSymbol localSymbol)
+                    {
+                        rightHandSideContainsUserInput = await IsAssignedFromUserInput(localSymbol, semanticModel, ignoreSymbols);
+                    }
+                }
+                else if (rightSideExpression is BinaryExpressionSyntax binaryExpressionSyntax)
+                {
+                    rightHandSideContainsUserInput = await RightHandSideContainsUserInput(binaryExpressionSyntax.Left, semanticModel, ignoreSymbols)
+                        || await RightHandSideContainsUserInput(binaryExpressionSyntax.Right, semanticModel, ignoreSymbols);
+                }
+                else if (rightSideExpression is ArrayCreationExpressionSyntax arrayCreationExpressionSyntax)
+                {
+                    // TODO: Spin through all items in the array initialization to look for outside input if necessary.
+                    rightHandSideContainsUserInput = false;
+                }
+                else if (symbol is IParameterSymbol parameterSymbol)
+                {
+                    rightHandSideContainsUserInput = true;
+                }
+                else if (symbol is ILocalSymbol localSymbol)
+                {
+                    rightHandSideContainsUserInput = await IsAssignedFromUserInput(localSymbol, semanticModel, ignoreSymbols);
+                }
+                else if (symbol is IMethodSymbol methodSymbol)
+                {
+                    if (IsPotentialUserInputMethod(methodSymbol))
+                    {
+                        rightHandSideContainsUserInput = true;
+                    }
+                    else
+                    {
+                        rightHandSideContainsUserInput = MethodContainsUserInputMethod(rightSideExpression, semanticModel);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Came across unknown symbol type: {symbol?.GetType()}");
+                    PrintDescendentNodes(rightSideExpression, semanticModel);
+                    Console.WriteLine();
+                    Console.WriteLine(rightSideExpression.SyntaxTree.GetRoot());
+                    PrintDescendentNodes(rightSideExpression.SyntaxTree.GetRoot(), semanticModel);
+                    Console.ReadLine();
+                }
+            }
+            return rightHandSideContainsUserInput;
+        }
+
+        private bool IsPotentialUserInputMethod(IMethodSymbol methodSymbol)
+        {
+            return potentialVulnerableMethods.Any(p => methodSymbol.ToDisplayString().StartsWith(p));
+        }
+
+        private async Task<bool> IsAssignedFromUserInput(ILocalSymbol localSymbol, SemanticModel semanticModel, List<string> ignoreSymbols = null)
+        {
+            if (ignoreSymbols == null)
+            {
+                ignoreSymbols = new List<string>();
+            }
+            ignoreSymbols.Add(localSymbol.ToDisplayString());
+            bool isAssignedFromUserInputMethod = false;
+            foreach (VariableDeclaratorSyntax variableDeclarator in semanticModel.SyntaxTree.GetRoot().DescendantNodes().OfType<VariableDeclaratorSyntax>())
+            {
+                if (variableDeclarator.Identifier.Text == localSymbol.Name && variableDeclarator.Initializer != null && await IsReachable(variableDeclarator))
+                {
+                    isAssignedFromUserInputMethod = isAssignedFromUserInputMethod || await RightHandSideContainsUserInput(variableDeclarator.Initializer.Value, semanticModel, ignoreSymbols);
+                }
+            }
+            if (!isAssignedFromUserInputMethod)
+            {
+                foreach (AssignmentExpressionSyntax assignmentExpression in semanticModel.SyntaxTree.GetRoot().DescendantNodes().OfType<AssignmentExpressionSyntax>())
+                {
+                    if (assignmentExpression.Left.ToString() == localSymbol.Name && await IsReachable(assignmentExpression))
+                    {
+                        isAssignedFromUserInputMethod = isAssignedFromUserInputMethod || await RightHandSideContainsUserInput(assignmentExpression.Right, semanticModel, ignoreSymbols);
+                    }
+                }
+            }
+
+            return isAssignedFromUserInputMethod;
+        }
+
+
     }
 }

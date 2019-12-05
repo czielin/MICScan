@@ -116,8 +116,8 @@ namespace ParseSard.Datasets
             //    }
             //    //Console.WriteLine($"{syntaxNode.Kind()} {syntaxNode.IsNode} {syntaxNode.IsToken} {syntaxNode.ToString()}");
             //}
-            Console.WriteLine(features);
-            Console.Read();
+            //Console.WriteLine(features);
+            //Console.Read();
             dataset.Add(new Example { ClassName = className, IsFlawed = isFlawed, Features = features.ToString() });
         }
 

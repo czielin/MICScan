@@ -4,17 +4,20 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ParseSardClassic.Datasets
 {
     public class RemoveCommentsDataset : Dataset
     {
-        protected override string FileName { get; } = "RemoveComments";
+        protected override string FileName { get; } = nameof(RemoveCommentsDataset);
 
-        public override void AddExample(string className, bool isFlawed, List<string> fileContents)
+        public override async Task<(Example withSource, Example withoutSource)> AddExample(string className, bool isFlawed, List<string> fileContents)
         {
             string processedContents = RemoveComments(fileContents);
-            dataset.Add(new Example { ClassName = className, IsFlawed = isFlawed, Features = processedContents });
+            Example example = new Example { ClassName = className, IsFlawed = isFlawed, Features = processedContents };
+            datasetWithSource.Add(example);
+            return (example, null);
         }
     }
 }

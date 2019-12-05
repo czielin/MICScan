@@ -262,4 +262,4 @@ __pycache__/
 
 # Additional
 sard_archive/
-*.json
+#*.json

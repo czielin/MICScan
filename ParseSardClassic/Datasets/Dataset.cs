@@ -7,12 +7,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ParseSardClassic.Datasets
 {
     public abstract class Dataset
     {
-        protected List<Example> dataset = new List<Example>();
+        protected List<Example> datasetWithSource = new List<Example>();
+        protected List<Example> datasetWithoutSource = new List<Example>();
+
         protected abstract string FileName { get; }
         private readonly Dictionary<string, List<Type>> assemblyReferenceMappings = new Dictionary<string, List<Type>>
         {
@@ -33,11 +36,17 @@ namespace ParseSardClassic.Datasets
             { "using System.Xml.Linq;", new List<Type> { typeof(System.Xml.Linq.XDocument) } }
         };
 
-        public abstract void AddExample(string className, bool isFlawed, List<string> fileContents);
+        public abstract Task<(Example withSource, Example withoutSource)> AddExample(string className, bool isFlawed, List<string> fileContents);
+
         public void SaveToFile(string directory)
         {
-            string json = JsonConvert.SerializeObject(dataset);
-            File.WriteAllText(Path.Combine(directory, $"{FileName}.json"), json);
+            string json = JsonConvert.SerializeObject(datasetWithSource);
+            File.WriteAllText(Path.Combine(directory, $"{FileName}WithSource.json"), json);
+            if (datasetWithoutSource.Count > 0)
+            {
+                json = JsonConvert.SerializeObject(datasetWithoutSource);
+                File.WriteAllText(Path.Combine(directory, $"{FileName}.json"), json);
+            }
         }
 
         protected static string CombineContents(List<string> fileContents)
@@ -98,6 +107,11 @@ namespace ParseSardClassic.Datasets
                 compilation = compilation.AddReferences(MetadataReference.CreateFromFile(location));
             }
             return compilation.AddSyntaxTrees(syntaxTree);
+        }
+
+        public virtual string GetPostExecutionOutput()
+        {
+            return "";
         }
     }
 }
