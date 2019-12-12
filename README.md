@@ -1,4 +1,4 @@
-# SardVulnerabilityClassifier
+# Sard Vulnerability Classifier
 
 This application takes the NIST SARD (Software Assurance Reference Dataset) and trains a model that can be used to detect if a code sample contains a vulnerability, and if so classify what type of vulnerability it contains. Currently it is limited to only the C# samples within the SARD.
 
