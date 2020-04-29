@@ -4,6 +4,6 @@ This application takes the NIST SARD (Software Assurance Reference Dataset) and 
 
 The C# command line application loops through each of the code samples and compiles, analyzes and partially executes the code in order to extract features that can be fed into the model. The features are output as JSON files into the Output directory.
 
-The Notebooks directory contains some Jupyter notebook used to train and test the model against these datasets. The notebook imporst the JSON datasets that the C# application outputs.
+The Notebooks directory contains some Jupyter notebooks used to train and test the model against these datasets. The notebook imports the JSON datasets that the C# application outputs.
 
 The SARD dataset is fairly large and is not included in this repository. It must be downloaded separately, extracted and referenced using the `sardRoot` variable in Program.cs.
