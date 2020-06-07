@@ -5,7 +5,11 @@ VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelGenerator", "VulnerabilityClassifier\ModelGenerator.csproj", "{17213AE3-011E-443C-963F-38AABAE3FF67}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleScanner", "ConsoleScanner\ConsoleScanner.csproj", "{BBD7AED8-53E8-429A-B038-85CBBBC67A08}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Classify", "Classify\Classify.pyproj", "{F640819C-ACD3-43B5-B4C9-CBBADB742D79}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scan", "Scan\Scan.csproj", "{298554F0-857B-4CD4-89CE-C81F0FF7A6F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "TestApplication\TestApplication.csproj", "{3A415431-340F-4AAA-901D-31FF32978BE4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +21,16 @@ Global
 		{17213AE3-011E-443C-963F-38AABAE3FF67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17213AE3-011E-443C-963F-38AABAE3FF67}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17213AE3-011E-443C-963F-38AABAE3FF67}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BBD7AED8-53E8-429A-B038-85CBBBC67A08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BBD7AED8-53E8-429A-B038-85CBBBC67A08}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BBD7AED8-53E8-429A-B038-85CBBBC67A08}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BBD7AED8-53E8-429A-B038-85CBBBC67A08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F640819C-ACD3-43B5-B4C9-CBBADB742D79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F640819C-ACD3-43B5-B4C9-CBBADB742D79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{298554F0-857B-4CD4-89CE-C81F0FF7A6F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{298554F0-857B-4CD4-89CE-C81F0FF7A6F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{298554F0-857B-4CD4-89CE-C81F0FF7A6F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{298554F0-857B-4CD4-89CE-C81F0FF7A6F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A415431-340F-4AAA-901D-31FF32978BE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A415431-340F-4AAA-901D-31FF32978BE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A415431-340F-4AAA-901D-31FF32978BE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A415431-340F-4AAA-901D-31FF32978BE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
