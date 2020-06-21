@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scan", "Scan\Scan.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "TestApplication\TestApplication.csproj", "{3A415431-340F-4AAA-901D-31FF32978BE4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudioExtension", "VisualStudioExtension\VisualStudioExtension.csproj", "{F3C23E81-0C94-4846-8505-419766FF839F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{3A415431-340F-4AAA-901D-31FF32978BE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A415431-340F-4AAA-901D-31FF32978BE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A415431-340F-4AAA-901D-31FF32978BE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3C23E81-0C94-4846-8505-419766FF839F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3C23E81-0C94-4846-8505-419766FF839F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3C23E81-0C94-4846-8505-419766FF839F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3C23E81-0C94-4846-8505-419766FF839F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
