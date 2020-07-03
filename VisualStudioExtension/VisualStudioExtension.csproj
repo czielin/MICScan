@@ -87,8 +87,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Assemblies\Microsoft.TeamFoundation.Git.Provider.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Diagnostics.Assert">
-      <HintPath>..\..\..\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.Diagnostics.Assert.dll</HintPath>
+    <Reference Include="Microsoft.VisualStudio.Diagnostics.Assert, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Assemblies\Microsoft.VisualStudio.Diagnostics.Assert.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Platform.WindowManagement, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
