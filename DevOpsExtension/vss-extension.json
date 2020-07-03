@@ -1,0 +1,32 @@
+{
+    "manifestVersion": 1,
+    "id": "micscan",
+    "publisher": "MICScan",
+    "version": "0.1.2",
+    "name": "MICScan",
+    "description": "An extension to allow MICScan to perform scans in the DevOps pipeline.",
+    "public": false,
+    "categories": ["Azure Pipelines"],
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "custom-build-release-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.tasks"
+            ],
+            "properties": {
+                "name": "buildAndReleaseTask"
+            }
+        }
+    ],
+    "files": [
+        {
+            "path": "buildAndReleaseTask"
+        }
+    ]
+}
