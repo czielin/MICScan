@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.MSBuild;
+using Newtonsoft.Json;
 using ParseSardClassic;
 using ParseSardClassic.Datasets;
 using System;
@@ -13,21 +15,46 @@ namespace Scan
 {
     public class Scanner
     {
-        ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset();
         string workingDirectory = Environment.CurrentDirectory;
         string pythonPath = @"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\python.exe";
         string classifyPythonFilePath = @"C:\git\sard\Classify\Classify.py";
         string modelPath = @"C:\git\sard\VulnerabilityClassifier\Notebooks\model.pkl";
         string vocabularyPath = @"C:\git\sard\VulnerabilityClassifier\Notebooks\vocabulary.pkl";
+        private bool verbose;
+
+        public Scanner(bool verbose)
+        {
+            this.verbose = verbose;
+        }
+
+        public async Task<List<Example>> ScanProject(string projectFilePath)
+        {
+            using (var workspace = MSBuildWorkspace.Create())
+            {
+                Project project = await workspace.OpenProjectAsync(projectFilePath);
+                IEnumerable<Document> documents = project.Documents.Where(d => d.FilePath != null && d.FilePath.EndsWith(".cs"));
+                List<Example> scannedFiles = new List<Example>();
+                ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset(projectFilePath);
+                foreach (Document document in documents)
+                {
+                    Example example = await ScanFile(document, externalArgumentsDataset);
+                    scannedFiles.Add(example);
+                }
+
+                await ClassifyFiles(scannedFiles);
+
+                return scannedFiles;
+            }
+        }
 
         public async Task<List<Example>> ScanFolder(string directoryPath)
         {
-            List<Example> scannedFiles = new List<Example>();
             string[] filePaths = Directory.GetFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
-
+            List<Example> scannedFiles = new List<Example>();
+            ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset(null);
             foreach (string filePath in filePaths)
             {
-                Example example = await ScanFile(filePath);
+                Example example = await ScanFile(filePath, externalArgumentsDataset);
                 scannedFiles.Add(example);
             }
 
@@ -36,11 +63,20 @@ namespace Scan
             return scannedFiles;
         }
 
-        public async Task<Example> ScanFile(string filePath)
+        private async Task<Example> ScanFile(string filePath, ExternalArgumentsDataset externalArgumentsDataset)
         {
             string fileContent = File.ReadAllText(filePath);
-            (_, var example) = await externalArgumentsDataset.AddExample("", false, fileContent);
+            (_, Example example) = await externalArgumentsDataset.AddExample("", false, fileContent);
             example.SourcePath = filePath;
+            example.Features = example.Features.Trim();
+            await ClassifyFile(example);
+            return example;
+        }
+
+        private async Task<Example> ScanFile(Document document, ExternalArgumentsDataset externalArgumentsDataset)
+        {
+            (_, Example example) = await externalArgumentsDataset.AddExample(document);
+            example.SourcePath = document.FilePath;
             example.Features = example.Features.Trim();
             await ClassifyFile(example);
             return example;
@@ -69,16 +105,19 @@ namespace Scan
             pythonProcessInfo.RedirectStandardError = true;
             pythonProcessInfo.UseShellExecute = false;
 
-            string errors;
-            string output;
-            using (Process pythonProcess = Process.Start(pythonProcessInfo))
+            if (verbose)
             {
-                errors = await pythonProcess.StandardError.ReadToEndAsync();
-                output = await pythonProcess.StandardOutput.ReadToEndAsync();
-            }
+                string errors;
+                string output;
+                using (Process pythonProcess = Process.Start(pythonProcessInfo))
+                {
+                    errors = await pythonProcess.StandardError.ReadToEndAsync();
+                    output = await pythonProcess.StandardOutput.ReadToEndAsync();
+                }
 
-            Console.WriteLine(output);
-            Console.Error.WriteLine(errors);
+                Console.WriteLine(output);
+                Console.Error.WriteLine(errors);
+            }
         }
     }
 }
