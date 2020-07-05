@@ -34,4 +34,4 @@ steps:
 
 - task: ScanForVulnerabilities@0
   inputs:
-    samplestring: 'Sample string entry'
+    ProjectFileName: 'TestApplication.csproj'
