@@ -8,7 +8,7 @@ namespace TestApplication
         public void TestMethod()
         {
             string command = Console.ReadLine();
-            SqlCommand sqlCommand = new SqlCommand(command);
+            SqlCommand sqlCommand = new SqlCommand("locally built command");
             sqlCommand.ExecuteNonQuery();
         }
     }
