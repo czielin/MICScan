@@ -1,0 +1,1 @@
+Execute build.ps1 to build and package the DevOps extension.

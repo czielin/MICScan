@@ -10,16 +10,17 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Scan
 {
     public class Scanner
     {
         string workingDirectory = Environment.CurrentDirectory;
-        string pythonPath = @"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\python.exe";
-        string classifyPythonFilePath = @"C:\git\sard\Classify\Classify.py";
-        string modelPath = @"C:\git\sard\VulnerabilityClassifier\Notebooks\model.pkl";
-        string vocabularyPath = @"C:\git\sard\VulnerabilityClassifier\Notebooks\vocabulary.pkl";
+        string pythonPath = @"python.exe"; // Should be in the path.
+        string classifyPythonFilePath = Path.Combine(Application.StartupPath, "Classify.py");
+        string modelPath = Path.Combine(Application.StartupPath, "model.pkl");
+        string vocabularyPath = Path.Combine(Application.StartupPath, "vocabulary.pkl");
         private bool verbose;
 
         public Scanner(bool verbose)
@@ -41,9 +42,7 @@ namespace Scan
                     scannedFiles.Add(example);
                 }
 
-                await ClassifyFiles(scannedFiles);
-
-                return scannedFiles;
+                return await ClassifyFiles(scannedFiles);
             }
         }
 
@@ -58,9 +57,7 @@ namespace Scan
                 scannedFiles.Add(example);
             }
 
-            await ClassifyFiles(scannedFiles);
-
-            return scannedFiles;
+            return await ClassifyFiles(scannedFiles);
         }
 
         private async Task<Example> ScanFile(string filePath, ExternalArgumentsDataset externalArgumentsDataset)
@@ -69,8 +66,7 @@ namespace Scan
             (_, Example example) = await externalArgumentsDataset.AddExample("", false, fileContent);
             example.SourcePath = filePath;
             example.Features = example.Features.Trim();
-            await ClassifyFile(example);
-            return example;
+            return await ClassifyFile(example);
         }
 
         private async Task<Example> ScanFile(Document document, ExternalArgumentsDataset externalArgumentsDataset)
@@ -78,20 +74,19 @@ namespace Scan
             (_, Example example) = await externalArgumentsDataset.AddExample(document);
             example.SourcePath = document.FilePath;
             example.Features = example.Features.Trim();
-            await ClassifyFile(example);
-            return example;
+            return await ClassifyFile(example);
         }
 
-        private async Task ClassifyFile(Example example)
+        private async Task<Example> ClassifyFile(Example example)
         {
             List<Example> examples = new List<Example>
             {
                 example
             };
-            await ClassifyFiles(examples);
+            return (await ClassifyFiles(examples)).Single();
         }
 
-        private async Task ClassifyFiles(List<Example> examples)
+        private async Task<List<Example>> ClassifyFiles(List<Example> examples)
         {
             string json = JsonConvert.SerializeObject(examples);
             string featuresFilePath = Path.Combine(workingDirectory, $"FileFeatures.json");
@@ -118,6 +113,10 @@ namespace Scan
                 Console.WriteLine(output);
                 Console.Error.WriteLine(errors);
             }
+
+            string classifiedFileContent = File.ReadAllText(classifiedFilePath);
+            List<Example> classifiedExamples = JsonConvert.DeserializeObject<List<Example>>(classifiedFileContent);
+            return classifiedExamples;
         }
     }
 }
