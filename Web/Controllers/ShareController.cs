@@ -42,6 +42,7 @@ namespace Web.Controllers
             sharedVulnerability.Comment = httpContext.Request.Form["Comment"];
             sharedVulnerability.CommitMessage = httpContext.Request.Form["CommitMessage"];
             sharedVulnerability.CweId = int.TryParse(httpContext.Request.Form["CweId"], out int cweId) ? cweId : (int?)null;
+            bool fixedWithCommit = bool.Parse(httpContext.Request.Form["FixedWithCommit"]);
 
             foreach (string key in httpContext.Request.Files.AllKeys)
             {
@@ -52,7 +53,14 @@ namespace Web.Controllers
                 {
                     sharedFile.Content = binaryReader.ReadBytes(file.ContentLength);
                 }
-                sharedFile.VulnerabilityState = key.StartsWith("currentFile") ? VulnerabilityState.AfterFix : VulnerabilityState.Vulnerable;
+                if (fixedWithCommit)
+                {
+                    sharedFile.VulnerabilityState = key.StartsWith("currentFile") ? VulnerabilityState.AfterFix : VulnerabilityState.Vulnerable;
+                }
+                else
+                {
+                    sharedFile.VulnerabilityState = key.StartsWith("currentFile") ? VulnerabilityState.Vulnerable : VulnerabilityState.BeforeIntroduction;
+                }
                 sharedVulnerability.SharedFiles.Add(sharedFile);
             }
 

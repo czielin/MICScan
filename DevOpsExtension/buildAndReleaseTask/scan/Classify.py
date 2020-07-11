@@ -23,8 +23,6 @@ class NumpyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 categories = ['No Flaw', 'CWE022', 'CWE078', 'CWE089', 'CWE090', 'CWE091']
-#print(model_path)
-#print(features_file_path)
 model = load(model_path)
 vocabulary = load(vocabulary_path)
 features = []
@@ -38,12 +36,10 @@ vectorizer = TfidfVectorizer(vocabulary=vocabulary,token_pattern=r"(?u)\b\w[\w\.
 feature_vectors = vectorizer.fit_transform(features)
 predicted_labels = model.predict(feature_vectors)
 for example_index in range(0, len(scanned_files)):
-    #print(scanned_files[example_index]['SourcePath'])
     if features[example_index] == '':
         predicted_label = 0 # No vulnerability
     else:
         predicted_label = predicted_labels[example_index]
-    #print(categories[predicted_label])
     scanned_files[example_index]['ClassName'] = categories[predicted_label]
 
 with open(classified_file_path, 'w') as json_file:
