@@ -1,4 +1,5 @@
 ﻿using Data.Enums;
+using LibGit2Sharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace Data.Model
         public int SharedVulnerabilityId { get; set; }
         public string Name { get; set; }
         public VulnerabilityState VulnerabilityState { get; set; }
+        public ChangeKind ChangeKind { get; set; }
         public byte[] Content { get; set; }
     }
 }
