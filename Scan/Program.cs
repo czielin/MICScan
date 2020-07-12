@@ -37,17 +37,20 @@ namespace Scan
                     //var csFiles = await scanner.ScanFolder(@"C:\git\sard\TestApplication");
                     List<Example> classifiedFiles = await scanner.ScanProject(projectFilePaths[0]);
                     ConsoleColor originalColor = Console.ForegroundColor;
+                    string flawDescription;
                     foreach (Example file in classifiedFiles)
                     {
                         if (file.ClassName == "No Flaw")
                         {
                             Console.ForegroundColor = ConsoleColor.Green;
+                            flawDescription = "";
                         }
                         else
                         {
                             Console.ForegroundColor = ConsoleColor.Red;
+                            flawDescription = $"{Environment.NewLine}\t{GetLabelDescription(file.ClassName)}";
                         }
-                        Console.WriteLine($"[{file.ClassName}] {file.SourcePath}");
+                        Console.WriteLine($"[{file.ClassName}] {file.SourcePath} {flawDescription}");
                     }
                     Console.ForegroundColor = originalColor;
                     exitCode = classifiedFiles.Count(f => f.ClassName != "No Flaw");
@@ -55,6 +58,30 @@ namespace Scan
             }
 
             return exitCode;
+        }
+
+        private static string GetLabelDescription(string label)
+        {
+            string description = null;
+            switch (label)
+            {
+                case "CWE022":
+                    description = "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')";
+                    break;
+                case "CWE078":
+                    description = "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')";
+                    break;
+                case "CWE089":
+                    description = "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')";
+                    break;
+                case "CWE090":
+                    description = "Improper Neutralization of Special Elements used in an LDAP Query ('LDAP Injection')";
+                    break;
+                case "CWE091":
+                    description = "XML Injection (aka Blind XPath Injection)";
+                    break;
+            }
+            return description;
         }
     }
 }

@@ -7,9 +7,9 @@ namespace TestApplication
     {
         public void TestMethod()
         {
-            //string command = Console.ReadLine();
-            //SqlCommand sqlCommand = new SqlCommand(command);
-            //sqlCommand.ExecuteNonQuery();
+            string command = Console.ReadLine();
+            SqlCommand sqlCommand = new SqlCommand(command);
+            sqlCommand.ExecuteNonQuery();
         }
     }
 }

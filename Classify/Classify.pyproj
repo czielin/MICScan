@@ -11,6 +11,9 @@
     <OutputPath>.</OutputPath>
     <Name>Classify</Name>
     <RootNamespace>Classify</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterArguments>"C:\git\sard\Scan\bin\Debug\Classify.py" "C:\git\sard\Scan\bin\Debug\model.pkl" "C:\git\sard\Scan\bin\Debug\FileFeatures.json" "C:\git\sard\Scan\bin\Debug\vocabulary.pkl" "C:\git\sard\Scan\bin\Debug\Classified.json"</InterpreterArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

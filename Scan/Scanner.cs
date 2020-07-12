@@ -38,7 +38,7 @@ namespace Scan
                 ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset(projectFilePath);
                 foreach (Document document in documents)
                 {
-                    Example example = await ScanFile(document, externalArgumentsDataset);
+                    Example example = await ExtractFileFeatures(document, externalArgumentsDataset);
                     scannedFiles.Add(example);
                 }
 
@@ -53,28 +53,28 @@ namespace Scan
             ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset(null);
             foreach (string filePath in filePaths)
             {
-                Example example = await ScanFile(filePath, externalArgumentsDataset);
+                Example example = await ExtractFileFeatures(filePath, externalArgumentsDataset);
                 scannedFiles.Add(example);
             }
 
             return await ClassifyFiles(scannedFiles);
         }
 
-        private async Task<Example> ScanFile(string filePath, ExternalArgumentsDataset externalArgumentsDataset)
+        private async Task<Example> ExtractFileFeatures(string filePath, ExternalArgumentsDataset externalArgumentsDataset)
         {
             string fileContent = File.ReadAllText(filePath);
             (_, Example example) = await externalArgumentsDataset.AddExample("", false, fileContent);
             example.SourcePath = filePath;
             example.Features = example.Features.Trim();
-            return await ClassifyFile(example);
+            return example;
         }
 
-        private async Task<Example> ScanFile(Document document, ExternalArgumentsDataset externalArgumentsDataset)
+        private async Task<Example> ExtractFileFeatures(Document document, ExternalArgumentsDataset externalArgumentsDataset)
         {
             (_, Example example) = await externalArgumentsDataset.AddExample(document);
             example.SourcePath = document.FilePath;
             example.Features = example.Features.Trim();
-            return await ClassifyFile(example);
+            return example;
         }
 
         private async Task<Example> ClassifyFile(Example example)
@@ -100,16 +100,18 @@ namespace Scan
             pythonProcessInfo.RedirectStandardError = true;
             pythonProcessInfo.UseShellExecute = false;
 
+
+            string errors;
+            string output;
+            using (Process pythonProcess = Process.Start(pythonProcessInfo))
+            {
+                errors = await pythonProcess.StandardError.ReadToEndAsync();
+                output = await pythonProcess.StandardOutput.ReadToEndAsync();
+            }
+
             if (verbose)
             {
-                string errors;
-                string output;
-                using (Process pythonProcess = Process.Start(pythonProcessInfo))
-                {
-                    errors = await pythonProcess.StandardError.ReadToEndAsync();
-                    output = await pythonProcess.StandardOutput.ReadToEndAsync();
-                }
-
+                Console.Write($"{pythonPath} {pythonProcessInfo.Arguments}");
                 Console.WriteLine(output);
                 Console.Error.WriteLine(errors);
             }
