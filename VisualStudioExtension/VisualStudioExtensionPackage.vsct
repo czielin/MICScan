@@ -55,13 +55,14 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidVisualStudioExtensionPackageCmdSet" id="EnableMicscanCommandId" priority="0x0100" type="Button">
+      <!-- Disable until Visual Studio scanning functionality is ready. -->
+      <!--<Button guid="guidVisualStudioExtensionPackageCmdSet" id="EnableMicscanCommandId" priority="0x0100" type="Button">
         <Parent guid="guidVisualStudioExtensionPackageCmdSet" id="ToolsMenu" />
         <Icon guid="guidImages" id="bmpPic1" />
         <Strings>
           <ButtonText>Enable/Disable MICScan</ButtonText>
         </Strings>
-      </Button>
+      </Button>-->
       <Button guid="guidSubmitVulnerabilityCmdSet" id="cmdidShareVulnerabilityFromHistoryCommand" priority="0x0100" type="Button">
         <Parent guid="guidSubmitVulnerabilityCmdSet" id="GitMenu" />
         <Icon guid="guidImages2" id="bmpPic1" />

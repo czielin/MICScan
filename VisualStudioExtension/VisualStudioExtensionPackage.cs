@@ -52,7 +52,8 @@ namespace VisualStudioExtension
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-            await EnableMicscanCommand.InitializeAsync(this);
+            // Disable for now. Add back when scanning functionality is ready.
+            //await EnableMicscanCommand.InitializeAsync(this);
             await ShareVulnerabilityFromHistoryCommand.InitializeAsync(this);
         }
 
