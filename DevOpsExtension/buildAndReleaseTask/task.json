@@ -2,7 +2,7 @@
     "$schema":  "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
     "id":  "809AC50C-0F01-447F-BA46-358E10FF62F5",
     "name":  "ScanForVulnerabilities",
-    "friendlyName":  "Scan for vulnerabilities",
+    "friendlyName":  "MICScan vulnerability scan",
     "description":  "Uses the MICScan application to identify vulnerabilities.",
     "helpMarkDown":  "",
     "category":  "Utility",
@@ -10,7 +10,7 @@
     "version":  {
                     "Major":  0,
                     "Minor":  1,
-                    "Patch":  30
+                    "Patch":  33
                 },
     "instanceNameFormat":  "Echo $(samplestring)",
     "inputs":  [
