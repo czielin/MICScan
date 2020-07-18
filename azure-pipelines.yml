@@ -35,8 +35,24 @@ steps:
 - task: ScanForVulnerabilities@0
   inputs:
     ProjectFileName: 'TestApplication.csproj'
-    VulnerabilityAction: 'Warn'
+    VulnerabilityAction: 'Fail'
+
 - task: ScanForVulnerabilities@0
   inputs:
-    ProjectFileName: 'TestApplication.csproj'
+    ProjectFileName: 'Data.csproj'
+    VulnerabilityAction: 'Fail'
+
+- task: ScanForVulnerabilities@0
+  inputs:
+    ProjectFileName: 'Scan.csproj'
+    VulnerabilityAction: 'Fail'
+
+- task: ScanForVulnerabilities@0
+  inputs:
+    ProjectFileName: 'VisualStudioExtension.csproj'
+    VulnerabilityAction: 'Fail'
+
+- task: ScanForVulnerabilities@0
+  inputs:
+    ProjectFileName: 'ModelGenerator.csproj'
     VulnerabilityAction: 'Fail'
