@@ -127,9 +127,17 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="bearsquare.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\EnableMicscanCommand.png" />
     <Content Include="Resources\ShareVulnerabilityFromHistoryCommand.png" />
     <Content Include="Resources\Share_16x.png" />
+    <Content Include="ShareDialog.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Share\ShareVulnerabilityDialog.xaml">

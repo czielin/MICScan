@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="VisualStudioExtension.e2cd4c00-922e-4df1-8c0c-c544991b6b7a" Version="1.0" Language="en-US" Publisher="Chris Zielin" />
-        <DisplayName>MICScan Extension</DisplayName>
-        <Description xml:space="preserve">Empty VSIX Project.</Description>
+        <Identity Id="VisualStudioExtension.e2cd4c00-922e-4df1-8c0c-c544991b6b7a" Version="0.1" Language="en-US" Publisher="MICScan" />
+        <DisplayName>MICScan Vulnerability Share</DisplayName>
+        <Description xml:space="preserve">This extension allows you to share commits with vulnerable code from your Visual Studio Git history to the MICScan dataset. </Description>
+        <MoreInfo>https://github.com/czielin/MICScan</MoreInfo>
+        <Icon>bearsquare.png</Icon>
+        <PreviewImage>ShareDialog.png</PreviewImage>
+        <Preview>true</Preview>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[16.0, 17.0)" />
