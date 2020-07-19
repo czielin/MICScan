@@ -2,10 +2,22 @@
     "manifestVersion":  1,
     "id":  "micscan",
     "publisher":  "MICScan",
-    "version":  "0.1.37",
+    "version":  "0.1.39",
     "name":  "MICScan",
     "description":  "An extension to allow MICScan to perform scans in the DevOps pipeline.",
-    "public":  false,
+    "public":  true,
+    "galleryFlags":  [
+                         "Preview"
+                     ],
+    "repository":  {
+                       "type":  "git",
+                       "uri":  "https://github.com/czielin/MICScan"
+                   },
+    "content":  {
+                    "details":  {
+                                    "path":  "overview.md"
+                                }
+                },
     "icons":  {
                   "default":  "images/bearsquare.png"
               },
