@@ -32,6 +32,8 @@ The SARD dataset is fairly large and is not included in this repository. It must
 
 This is a command line application that takes a project file as input. It takes every C# file referenced in the project file preprocesses it reusing the labelling functionality from **ModelGenerator** and then classifies it using the python script in the **Classify** project.
 
+![Command Line Scan](https://github.com/czielin/MICScan/blob/master/images/CommandLineScan.png?raw=true)
+
 **TestApplication**
 
 This is a simple fake test application that we have used to introduce mock bugs while testing the **Scan** and **DevOpsExtension** features.
