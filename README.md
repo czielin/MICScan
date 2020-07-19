@@ -46,6 +46,8 @@ This project contains a Visual Studio extension that allows sharing of vulnerabl
 
 ![Share Vulnerability Dialog](https://github.com/czielin/MICScan/blob/master/images/ShareDialog.png?raw=true)
 
+![Share Vulnerability Output](https://github.com/czielin/MICScan/blob/master/images/ShareOutput.png?raw=true)
+
 **Web**
 
 This is an ASP.NET Web API project whose sole purpose right now is to collect submissions of vulnerable code shared from the Visual Studio extension in the **VisualStudioExtension** project.
