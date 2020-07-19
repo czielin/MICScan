@@ -18,6 +18,8 @@ This is project that uses Entity Framework to define the database schema used by
 
 This project contains the content of the Azure DevOps extension. The extension allows the MICScan **Scan** application to be added to a DevOps pipeline in order to scan for vulnerabalities during a build. It can be configured to either raise a warning when a vulnerability is detected, or fail the build altogether. There is a *build.ps1* file that can be used to build and package the extension when updates are made.
 
+A preview of the extension is available in the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=MICScan.micscan).
+
 ![Find DevOps Extension](https://github.com/czielin/MICScan/blob/master/images/DevOpsPipelineFindExtension.png?raw=true)
 
 ![DevOps Pipeline Settings](https://github.com/czielin/MICScan/blob/master/images/DevOpsPipelineSettings.png?raw=true)
@@ -41,6 +43,8 @@ This is a simple fake test application that we have used to introduce mock bugs 
 **VisualStudioExtension**
 
 This project contains a Visual Studio extension that allows sharing of vulnerable commits through the MICScan API in the **Web** project. This is done by right clicking on a commit in the Git history within Visual Studio and selecting the option to share with MICScan.
+
+A preview of the extension is available in the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=MICScan.VulnerabilityShare).
 
 ![Share Vulnerability Context Menu](https://github.com/czielin/MICScan/blob/master/images/GitHistory.png?raw=true)
 
