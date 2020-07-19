@@ -41,8 +41,10 @@ namespace VisualStudioExtension.Settings
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
-            var menuItem = new MenuCommand(this.Execute, menuCommandID);
-            menuItem.Checked = GeneralSettings.Default.ScanEnabled;
+            var menuItem = new MenuCommand(this.Execute, menuCommandID)
+            {
+                Checked = GeneralSettings.Default.ScanEnabled
+            };
             commandService.AddCommand(menuItem);
         }
 
@@ -55,16 +57,7 @@ namespace VisualStudioExtension.Settings
             private set;
         }
 
-        /// <summary>
-        /// Gets the service provider from the owner package.
-        /// </summary>
-        private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider
-        {
-            get
-            {
-                return this.package;
-            }
-        }
+        public AsyncPackage Package => package;
 
         /// <summary>
         /// Initializes the singleton instance of the command.

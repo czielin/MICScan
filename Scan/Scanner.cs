@@ -16,12 +16,12 @@ namespace Scan
 {
     public class Scanner
     {
-        string workingDirectory = Environment.CurrentDirectory;
-        string pythonPath = @"python.exe"; // Should be in the path.
-        string classifyPythonFilePath = Path.Combine(Application.StartupPath, "Classify.py");
-        string modelPath = Path.Combine(Application.StartupPath, "model.pkl");
-        string vocabularyPath = Path.Combine(Application.StartupPath, "vocabulary.pkl");
-        private bool verbose;
+        readonly string workingDirectory = Environment.CurrentDirectory;
+        readonly string pythonPath = @"python.exe"; // Should be in the path.
+        readonly string classifyPythonFilePath = Path.Combine(Application.StartupPath, "Classify.py");
+        readonly string modelPath = Path.Combine(Application.StartupPath, "model.pkl");
+        readonly string vocabularyPath = Path.Combine(Application.StartupPath, "vocabulary.pkl");
+        private readonly bool verbose;
 
         public Scanner(bool verbose)
         {
@@ -77,28 +77,21 @@ namespace Scan
             return example;
         }
 
-        private async Task<Example> ClassifyFile(Example example)
-        {
-            List<Example> examples = new List<Example>
-            {
-                example
-            };
-            return (await ClassifyFiles(examples)).Single();
-        }
-
         private async Task<List<Example>> ClassifyFiles(List<Example> examples)
         {
             string json = JsonConvert.SerializeObject(examples);
             string featuresFilePath = Path.Combine(workingDirectory, $"FileFeatures.json");
             string classifiedFilePath = Path.Combine(workingDirectory, $"Classified.json");
             File.WriteAllText(featuresFilePath, json);
-            ProcessStartInfo pythonProcessInfo = new ProcessStartInfo();
-            pythonProcessInfo.FileName = pythonPath;
-            pythonProcessInfo.Arguments = $"\"{classifyPythonFilePath}\" \"{modelPath}\" \"{featuresFilePath}\" \"{vocabularyPath}\" \"{classifiedFilePath}\"";
-            pythonProcessInfo.CreateNoWindow = true;
-            pythonProcessInfo.RedirectStandardOutput = true;
-            pythonProcessInfo.RedirectStandardError = true;
-            pythonProcessInfo.UseShellExecute = false;
+            ProcessStartInfo pythonProcessInfo = new ProcessStartInfo
+            {
+                FileName = pythonPath,
+                Arguments = $"\"{classifyPythonFilePath}\" \"{modelPath}\" \"{featuresFilePath}\" \"{vocabularyPath}\" \"{classifiedFilePath}\"",
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
+            };
 
 
             string errors;

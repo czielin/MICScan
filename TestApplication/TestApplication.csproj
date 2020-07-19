@@ -49,6 +49,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\SecurityCodeScan.3.5.3.0\analyzers\dotnet\SecurityCodeScan.dll" />
+    <Analyzer Include="..\packages\SecurityCodeScan.3.5.3.0\analyzers\dotnet\YamlDotNet.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
