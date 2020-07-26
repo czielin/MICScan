@@ -9,8 +9,6 @@ features_file_path = sys.argv[2]
 vocabulary_path = sys.argv[3]
 classified_file_path = sys.argv[4]
 
-print('test')
-
 # Borrowed from:
 # https://stackoverflow.com/questions/26646362/numpy-array-is-not-json-serializable
 class NumpyEncoder(json.JSONEncoder):
