@@ -31,8 +31,3 @@ steps:
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-
-- task: ScanForVulnerabilities@0
-  inputs:
-    ProjectFileName: 'TestApi.csproj'
-    VulnerabilityAction: 'Fail'
