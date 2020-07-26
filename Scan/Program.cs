@@ -17,7 +17,7 @@ namespace Scan
 
             try
             {
-                Scanner scanner = new Scanner(true);
+                Scanner scanner = new Scanner(false);
                 if (args.Length != 2)
                 {
                     Console.Error.WriteLine("Missing expected arguments: Scan.exe [Project File Name] [Source Path]");

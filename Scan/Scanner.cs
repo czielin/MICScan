@@ -35,7 +35,7 @@ namespace Scan
                 Project project = await workspace.OpenProjectAsync(projectFilePath);
                 IEnumerable<Document> documents = project.Documents.Where(d => d.FilePath != null && d.FilePath.EndsWith(".cs"));
                 List<Example> scannedFiles = new List<Example>();
-                ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset(projectFilePath);
+                ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset(projectFilePath, verbose);
                 foreach (Document document in documents)
                 {
                     Example example = await ExtractFileFeatures(document, externalArgumentsDataset);
@@ -50,7 +50,7 @@ namespace Scan
         {
             string[] filePaths = Directory.GetFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
             List<Example> scannedFiles = new List<Example>();
-            ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset(null);
+            ExternalArgumentsDataset externalArgumentsDataset = new ExternalArgumentsDataset(null, verbose);
             foreach (string filePath in filePaths)
             {
                 Example example = await ExtractFileFeatures(filePath, externalArgumentsDataset);
