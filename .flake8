@@ -12,7 +12,4 @@ ignore =
   F601, # temporary,
   W503, # line break,
   W504, # line break
-  D101, # Missing docstring in public class
-  D103, # Missing docstring in public function
-  D107, # Missing docstring in __init__
 max-line-length=101
