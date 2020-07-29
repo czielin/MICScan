@@ -36,3 +36,4 @@ steps:
   inputs:
     ProjectFileName: 'TestApi.csproj'
     VulnerabilityAction: 'Fail'
+    
