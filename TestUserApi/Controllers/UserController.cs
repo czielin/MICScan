@@ -13,7 +13,7 @@ namespace TestUserApi.Controllers
     {
         public User GetUser()
         {
-            string username = HttpContext.Current.User.Identity.Name;
+            string username = Request.Headers.GetCookies("user").First()["username"].Value;
             string query = "SELECT * FROM Users WHERE Username = '" + username + "'";
             SqlConnection sqlConnection = new SqlConnection("(local)");
             sqlConnection.Open();
