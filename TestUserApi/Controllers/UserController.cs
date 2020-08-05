@@ -11,8 +11,9 @@ namespace TestUserApi.Controllers
 {
     public class UserController : ApiController
     {
-        public User GetUser(string username)
+        public User GetUser()
         {
+            string username = HttpContext.Current.User.Identity.Name;
             string query = "SELECT * FROM Users WHERE Username = '" + username + "'";
             SqlConnection sqlConnection = new SqlConnection("(local)");
             sqlConnection.Open();
