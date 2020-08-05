@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using System.Drawing;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Principal;
@@ -11,9 +12,8 @@ namespace TestUserApi.Controllers
 {
     public class UserController : ApiController
     {
-        public User GetUser()
+        public User GetUser(string username)
         {
-            string username = HttpContext.Current.User.Identity.Name;
             string query = "SELECT * FROM Users WHERE Username = '" + username + "'";
             SqlConnection sqlConnection = new SqlConnection("(local)");
             sqlConnection.Open();
