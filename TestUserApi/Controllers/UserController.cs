@@ -14,19 +14,20 @@ namespace TestUserApi.Controllers
     {
         public User GetUser()
         {
-            string username = HttpContext.Current.User.Identity.Name;
-            string query = "SELECT * FROM Users WHERE Username = '" + username + "'";
-            SqlConnection sqlConnection = new SqlConnection("(local)");
-            sqlConnection.Open();
-            SqlCommand sqlCommand = sqlConnection.CreateCommand();
-            sqlCommand.CommandText = query;
-            SqlDataReader reader = sqlCommand.ExecuteReader();
-            reader.Read();
-            return new User
-            {
-                FirstName = (string)reader["FirstName"],
-                LastName = (string)reader["LastName"]
-            };
+            //string username = HttpContext.Current.User.Identity.Name;
+            //string query = "SELECT * FROM Users WHERE Username = '" + username + "'";
+            //SqlConnection sqlConnection = new SqlConnection("(local)");
+            //sqlConnection.Open();
+            //SqlCommand sqlCommand = sqlConnection.CreateCommand();
+            //sqlCommand.CommandText = query;
+            //SqlDataReader reader = sqlCommand.ExecuteReader();
+            //reader.Read();
+            //return new User
+            //{
+            //    FirstName = (string)reader["FirstName"],
+            //    LastName = (string)reader["LastName"]
+            //};
+            return new User();
         }
     }
 }
