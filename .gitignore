@@ -264,5 +264,5 @@ __pycache__/
 sard_archive/
 #*.json
 
-.vscode
+.vscode/
 .DS_Store

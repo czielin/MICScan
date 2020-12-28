@@ -14,22 +14,14 @@ import json
 import os
 import sys
 
+from utils import json_equals
 
-class Script:
+
+class ClassifyScript:
     def __init__(self, path, args, classified_file_path):
         self.path = path
         self.args = args
         self.classified_file_path = classified_file_path
-
-
-def json_equals(path1, path2):
-    """Test equality of json files"""
-    with open(path1) as json_file1:
-        json_obj1 = json.load(json_file1)
-    with open(path2) as json_file2:
-        json_obj2 = json.load(json_file2)
-
-    return json.dumps(json_obj1, sort_keys=True) == json.dumps(json_obj2, sort_keys=True)
 
 
 def run_script(script_path, args):
@@ -40,10 +32,20 @@ def run_script(script_path, args):
     return not os.system(command)
 
 
-def script_equals(script1, script2):
+def script_equals(script1, script2, output_equality_method='json'):
     """Test equality of scripts."""
-    return run_script(script1.path, script1.args) and run_script(script2.path, script2.args) \
-        and json_equals(script1.classified_file_path, script2.classified_file_path)
+    scripts_ok = run_script(script1.path, script1.args) and run_script(script2.path, script2.args)
+    output_equal = True
+
+    if scripts_ok:
+        if output_equality_method == 'json':
+            with open(script1.classified_file_path) as json_file1:
+                json_obj1 = json.load(json_file1)
+            with open(script2.classified_file_path) as json_file2:
+                json_obj2 = json.load(json_file2)
+            output_equal = json_equals(json_obj1, json_obj2)
+
+    return scripts_ok and output_equal
 
 
 def main():
@@ -72,8 +74,8 @@ def main():
         args.classified_file_path2
     ]
 
-    script1 = Script(args.script1_path, script1_args, args.classified_file_path1)
-    script2 = Script(args.script2_path, script2_args, args.classified_file_path2)
+    script1 = ClassifyScript(args.script1_path, script1_args, args.classified_file_path1)
+    script2 = ClassifyScript(args.script2_path, script2_args, args.classified_file_path2)
 
     equal = script_equals(script1, script2)
     output = 'Scripts equal.' if equal else 'Scripts NOT equal.'

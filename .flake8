@@ -7,8 +7,6 @@ ignore =
   D401, # first line should be in imperative mood
   N805, # static methods do not need to call self
   H238,  # flake8 error, currently new style
-  D205, # docstring header for pydraughts
-  D400 # docstring header for pydraughts
   F601, # temporary,
   W503, # line break,
   W504, # line break
