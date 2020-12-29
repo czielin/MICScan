@@ -1,0 +1,13 @@
+[flake8]
+import-order-style=google
+exclude=.git,__pycache__,*__init__.py
+ignore =
+  N806, # Variables can be CamelCase
+  H903, # allows window style line ending
+  D401, # first line should be in imperative mood
+  N805, # static methods do not need to call self
+  H238,  # flake8 error, currently new style
+  F601, # temporary,
+  W503, # line break,
+  W504, # line break
+max-line-length=101
