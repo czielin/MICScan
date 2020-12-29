@@ -14,6 +14,7 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterArguments>"C:\git\sard\Scan\bin\Debug\Classify.py" "C:\git\sard\Scan\bin\Debug\model.pkl" "C:\git\sard\Scan\bin\Debug\FileFeatures.json" "C:\git\sard\Scan\bin\Debug\vocabulary.pkl" "C:\git\sard\Scan\bin\Debug\Classified.json"</InterpreterArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <InterpreterId>MSBuild|from requirements|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +26,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Classify.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="requirements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="from requirements\">
+      <Id>from requirements</Id>
+      <Version>3.8</Version>
+      <Description>from requirements (Python 3.8 (32-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X86</Architecture>
+    </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
